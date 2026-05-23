@@ -1,4 +1,4 @@
-# ![dummio](docs/pictures/dummio_logo.png)
+# Dummio
 
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/your-org/dummio/graphs/commit-activity) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
