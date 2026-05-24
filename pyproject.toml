@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "dummio"
+version = "0.1.0"
+description = "An open source virtual IoT device service."
+authors = ["Dummio Contributors <contributors@dummio.org>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "dummio", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.111.0"
+uvicorn = "^0.30.1"
+pydantic = "^2.7.4"
+paho-mqtt = "^2.1.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
+httpx = "^0.27.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
