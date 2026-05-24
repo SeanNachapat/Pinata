@@ -41,7 +41,13 @@ Dummio comes with real-world device presets. The first available preset is the *
 
 ## Quickstart Notebooks & Examples
 
-The easiest way to get started is to run Dummio directly from a Python script or Jupyter Notebook. 
+The easiest way to get started is to use the provided template script in `examples/basic_template.py`.
+
+```bash
+python examples/basic_template.py
+```
+
+This script contains the following core boilerplate to spin up a virtual Industrial Motor and start the server:
 
 ```python
 import asyncio
