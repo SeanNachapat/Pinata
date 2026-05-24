@@ -13,6 +13,7 @@ fastapi = "^0.111.0"
 uvicorn = "^0.30.1"
 pydantic = "^2.7.4"
 paho-mqtt = "^2.1.0"
+amqtt = "^0.11.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
