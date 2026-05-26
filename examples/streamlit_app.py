@@ -427,6 +427,38 @@ st.markdown("---")
 
 st.subheader("🛠️ Hardware Control Panel & Anomaly Injector")
 
+# Dynamic wear and tear simulation controllers
+col_ctrl1, col_ctrl2 = st.columns(2)
+with col_ctrl1:
+    severity_mult = st.slider(
+        "Select Anomaly Severity (Intensity)",
+        min_value=0.2,
+        max_value=3.0,
+        value=1.0,
+        step=0.1,
+        help="Selects the intensity multiplier of the anomaly. Higher values lead to faster, more severe breakdowns."
+    )
+with col_ctrl2:
+    col_dur, col_inf = st.columns([2, 1])
+    with col_inf:
+        st.markdown("<div style='height: 25px;'></div>", unsafe_allow_html=True)
+        infinite_duration = st.checkbox(
+            "Indefinite",
+            value=False,
+            help="Keep the failure active indefinitely until you click 'Clear Anomaly'."
+        )
+    with col_dur:
+        duration_sec = st.slider(
+            "Duration (Seconds)",
+            min_value=5,
+            max_value=120,
+            value=30,
+            step=5,
+            disabled=infinite_duration,
+            help="Selects how long the anomaly lasts before the system auto-cools/repairs."
+        )
+        duration_input = None if infinite_duration else duration_sec
+
 col_a1, col_a2, col_clear = st.columns(3)
 
 inject_type = None
@@ -448,14 +480,16 @@ with col_clear:
 # Process physical triggers
 if inject_type:
     if mode == "Local Simulation Engine":
-        req = AnomalyInjectionRequest(anomaly_type=inject_type, duration_seconds=30)
+        req = AnomalyInjectionRequest(anomaly_type=inject_type, duration_seconds=duration_input, intensity=severity_mult)
         st.session_state.local_device.inject_anomaly(req)
-        st.toast(f"Local {device_key} anomaly '{inject_type}' injected for 30s!", icon="🚨")
+        dur_msg = "indefinitely" if infinite_duration else f"for {duration_sec}s"
+        st.toast(f"Local {device_key} anomaly '{inject_type}' (Severity: {severity_mult}x) injected {dur_msg}!", icon="🚨")
     else:
         try:
-            res = requests.post(f"{api_url}/api/inject", json={"anomaly_type": inject_type, "duration_seconds": 30})
+            res = requests.post(f"{api_url}/api/inject", json={"anomaly_type": inject_type, "duration_seconds": duration_input, "intensity": severity_mult})
             if res.status_code == 200:
-                st.toast(f"Server anomaly '{inject_type}' injected for 30s!", icon="🚨")
+                dur_msg = "indefinitely" if infinite_duration else f"for {duration_sec}s"
+                st.toast(f"Server anomaly '{inject_type}' (Severity: {severity_mult}x) injected {dur_msg}!", icon="🚨")
             else:
                 st.error(f"Failed to inject anomaly: {res.text}")
         except Exception as e:
