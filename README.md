@@ -2,7 +2,7 @@
 
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/your-org/dummio/graphs/commit-activity) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-We propose **Dummio**, an open-source virtual IoT device service and Python package designed for evaluating anomaly detection cores and building IoT pipelines. Dummio allows working with fake sensor devices that behave exactly like real hardware, providing realistic data streams and an **event injection API** to trigger failures on demand.
+We are an open-source virtual IoT device service and Python package designed for evaluating anomaly detection cores and building IoT pipelines. Dummio allows working with fake sensor devices that behave exactly like real hardware, providing realistic data streams and an **event injection API** to trigger failures on demand.
 
 Dummio acts as the perfect companion data source for ML pipelines and anomaly detection libraries.
 
