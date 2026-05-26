@@ -73,6 +73,33 @@ curl -X POST http://localhost:8000/api/inject \
     -d '{"anomaly_type": "bearing_wear", "duration": 60}'
 ```
 
+## Streamlit Real-time Dashboard & Plotter
+
+We have built a premium, interactive **Streamlit Dashboard** in the repository to let you visualize live sensor telemetries, monitor device health status, and manually inject failures using a point-and-click control panel.
+
+### Running Locally
+To launch the dashboard on your machine:
+1. Ensure the package is installed with Poetry:
+   ```bash
+   poetry install
+   ```
+2. Launch the Streamlit dashboard:
+   ```bash
+   poetry run streamlit run examples/streamlit_app.py
+   ```
+
+### Dual Operations Modes
+The dashboard supports two operation profiles selectable from the sidebar:
+- **Local Simulation Engine (Zero Setup)**: Runs the physical IoT device simulator directly inside the dashboard session. Perfect for demos, offline testing, and cloud hosting!
+- **Connect to Live API Server**: Dynamically connects via **WebSockets** and **REST** to an active Dummio FastAPI background server (like `examples/basic_template.py`), allowing you to observe server-injected anomalies in real-time.
+
+### Deploying to Streamlit Cloud (GitHub Integration)
+You can easily deploy a live version of this dashboard for the public to play with:
+1. Push your repository to **GitHub**.
+2. Visit [Streamlit Community Cloud](https://share.streamlit.io/).
+3. Connect your repository, choose the branch, and set the main file path to `examples/streamlit_app.py`.
+4. Deploy! Streamlit will automatically install dependencies from your `pyproject.toml` and host the interactive local-simulation dashboard for free.
+
 ## Citation
 
 If you use Dummio in your research, please consider citing our project.
