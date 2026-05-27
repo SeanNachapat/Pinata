@@ -1,0 +1,57 @@
+@import "tailwindcss";
+@source "../**/*.{ts,tsx}";
+
+:root {
+  --background: #f4f4f6;
+  --foreground: #000000;
+  --card-bg: #ffffff;
+  --border-color: #000000;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card-bg);
+  --color-border-main: var(--border-color);
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Dot matrix grid background utility */
+.dot-matrix {
+  background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+  background-size: 12px 12px;
+}
+
+/* Custom raw terminal style slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #e5e7eb;
+  height: 6px;
+  border: 1px solid #000000;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #000000;
+  border: 1px solid #000000;
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #000000;
+  border: 1px solid #000000;
+  cursor: pointer;
+}

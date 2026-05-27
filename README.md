@@ -73,32 +73,32 @@ curl -X POST http://localhost:8000/api/inject \
     -d '{"anomaly_type": "bearing_wear", "duration": 60}'
 ```
 
-## Streamlit Real-time Dashboard & Plotter
+## Web Landing Page & Interactive Playground
 
-We have built a premium, interactive **Streamlit Dashboard** in the repository to let you visualize live sensor telemetries, monitor device health status, and manually inject failures using a point-and-click control panel.
+We have built a gorgeous, interactive Next.js marketing landing page and hardware telemetry playground inside the `web/` directory. This web app displays features, provides copy-paste quickstarts, and hosts an interactive simulator running physically realistic devices (Motor, Turbine, HVAC) and fail states directly inside the browser window.
 
 ### Running Locally
-To launch the dashboard on your machine:
-1. Ensure the package is installed with Poetry:
+To launch the web app on your local machine:
+1. Navigate into the web folder:
    ```bash
-   poetry install
+   cd web
    ```
-2. Launch the Streamlit dashboard:
+2. Install npm packages:
    ```bash
-   poetry run streamlit run examples/streamlit_app.py
+   npm install
    ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+4. Open [http://localhost:3000](http://localhost:3000) in your web browser.
 
-### Dual Operations Modes
-The dashboard supports two operation profiles selectable from the sidebar:
-- **Local Simulation Engine (Zero Setup)**: Runs the physical IoT device simulator directly inside the dashboard session. Perfect for demos, offline testing, and cloud hosting!
-- **Connect to Live API Server**: Dynamically connects via **WebSockets** and **REST** to an active Dummio FastAPI background server (like `examples/basic_template.py`), allowing you to observe server-injected anomalies in real-time.
-
-### Deploying to Streamlit Cloud (GitHub Integration)
-You can easily deploy a live version of this dashboard for the public to play with:
+### Deploying to Vercel
+This landing page is pre-configured and optimized to be hosted on **Vercel** for free:
 1. Push your repository to **GitHub**.
-2. Visit [Streamlit Community Cloud](https://share.streamlit.io/).
-3. Connect your repository, choose the branch, and set the main file path to `examples/streamlit_app.py`.
-4. Deploy! Streamlit will automatically install dependencies from your `pyproject.toml` and host the interactive local-simulation dashboard for free.
+2. Go to the [Vercel Dashboard](https://vercel.com/) and import your project.
+3. In the project settings, set the **Root Directory** to `web`.
+4. Click **Deploy**. Vercel will automatically build the Next.js bundle and host the interactive landing page.
 
 ## Citation
 
