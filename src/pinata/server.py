@@ -4,11 +4,11 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from dummio.devices.base import VirtualDevice
-from dummio.models import AnomalyInjectionRequest, SensorReading
-from dummio.protocols.mqtt import MQTTClient
+from pinata.devices.base import VirtualDevice
+from pinata.models import AnomalyInjectionRequest, SensorReading
+from pinata.protocols.mqtt import MQTTClient
 
-logger = logging.getLogger("dummio.server")
+logger = logging.getLogger("pinata.server")
 
 class Server:
     """
@@ -21,7 +21,7 @@ class Server:
         self.port = port
         
         self.app = FastAPI(
-            title=f"Dummio - {device.preset_name}",
+            title=f"Piñata - {device.preset_name}",
             description="Virtual IoT device simulation server"
         )
         self.app.add_middleware(

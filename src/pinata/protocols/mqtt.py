@@ -4,9 +4,9 @@ import logging
 from typing import Optional
 import paho.mqtt.client as mqtt
 
-from dummio.models import SensorReading
+from pinata.models import SensorReading
 
-logger = logging.getLogger("dummio.mqtt")
+logger = logging.getLogger("pinata.mqtt")
 
 def get_free_port():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -96,6 +96,6 @@ class MQTTClient:
         
     def publish_reading(self, reading: SensorReading):
         if self.is_connected:
-            topic = f"dummio/devices/{reading.preset}/{reading.device_id}/sensors"
+            topic = f"pinata/devices/{reading.preset}/{reading.device_id}/sensors"
             payload = reading.model_dump_json()
             self.client.publish(topic, payload)

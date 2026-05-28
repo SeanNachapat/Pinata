@@ -1,6 +1,6 @@
 import random
 from typing import Dict
-from dummio.devices.base import VirtualDevice
+from pinata.devices.base import VirtualDevice
 
 class IndustrialMotor(VirtualDevice):
     """

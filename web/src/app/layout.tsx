@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Dummio | Virtual IoT Device Simulator & Anomaly Engine",
+  title: "Piñata | Virtual IoT Device Simulator & Anomaly Engine",
   description: "An open-source virtual IoT device simulator and Python package. Simulate physically realistic generators, motors, and climate systems with zero hardware footprint, featuring a real-time failure injection API for anomaly detection evaluation.",
 };
 

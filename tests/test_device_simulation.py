@@ -1,6 +1,6 @@
 import pytest
-from dummio.devices import IndustrialMotor, WindTurbine, SmartHVAC
-from dummio.models import AnomalyInjectionRequest
+from pinata.devices import IndustrialMotor, WindTurbine, SmartHVAC
+from pinata.models import AnomalyInjectionRequest
 
 def test_motor_default_behavior():
     motor = IndustrialMotor()

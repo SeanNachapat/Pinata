@@ -64,8 +64,8 @@ const DEVICE_CONFIGS = {
 };
 
 const CODE_EXAMPLES = {
-  python: `from dummio import Server
-from dummio.devices import IndustrialMotor
+  python: `from pinata import Server
+from pinata.devices import IndustrialMotor
 import asyncio
 
 async def main():
@@ -85,7 +85,7 @@ curl -X POST http://localhost:8000/api/inject \\
 
 # Clear active failures
 curl -X POST http://localhost:8000/api/clear`,
-  javascript: `// Connect to Dummio WebSocket stream
+  javascript: `// Connect to Piñata WebSocket stream
 const ws = new WebSocket("ws://localhost:8000/ws");
 
 ws.onmessage = (event) => {
@@ -505,7 +505,7 @@ ${currentBlade}
         <header className="border-b border-black flex flex-row justify-between items-center text-[10px] font-mono uppercase bg-[#fcfcfd]">
           <div className="px-4 py-2.5 border-r border-black font-bold flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
-            DUMMIO V.01
+            PIÑATA V.01
           </div>
           <div className="px-4 py-2.5 font-semibold flex items-center gap-1">
             {activeAnomaly ? (
@@ -523,7 +523,7 @@ ${currentBlade}
         {/* HERO TITLE SECTION */}
         <section className="px-6 py-8 border-b border-black">
           <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tighter uppercase text-black leading-none mb-2">
-            D1 VIRTUAL HARDWARE
+            PIÑATA HARDWARE
           </h1>
           <p className="text-xs font-mono text-gray-500 leading-normal max-w-2xl mb-5">
             Open-source IoT device emulator with physics-based telemetry and failure injection APIs.
@@ -534,9 +534,9 @@ ${currentBlade}
             {/* pip install */}
             <div className="flex items-center gap-2 border border-black px-3 py-2 bg-gray-50 font-mono text-[11px]">
               <Terminal className="w-3.5 h-3.5 text-black flex-shrink-0" />
-              <code className="text-black font-bold">pip install dummio</code>
+              <code className="text-black font-bold">pip install pinata</code>
               <button 
-                onClick={() => copyToClipboard("pip install dummio", "pip")}
+                onClick={() => copyToClipboard("pip install pinata", "pip")}
                 className="ml-1 w-6 h-6 flex items-center justify-center border border-black bg-white hover:bg-black hover:text-white transition-all flex-shrink-0"
               >
                 {copiedState === "pip" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
@@ -552,7 +552,7 @@ ${currentBlade}
 
             {/* GitHub CTA */}
             <a 
-              href="https://github.com/SeanNachapat/Dummio" 
+              href="https://github.com/SeanNachapat/Pinata" 
               target="_blank" 
               rel="noreferrer" 
               className="flex items-center gap-1.5 border border-black px-3 py-2 bg-black text-white font-mono text-[10px] font-bold uppercase hover:bg-white hover:text-black transition-all"
@@ -979,7 +979,7 @@ ${currentBlade}
         <footer className="border-t border-black px-6 py-6 bg-[#fcfcfd] flex flex-col sm:flex-row justify-between items-center gap-3 text-[10px] font-mono text-gray-500 uppercase">
           <div className="flex items-center gap-2">
             <Zap className="w-3.5 h-3.5 text-black" />
-            <span className="font-bold text-black text-[11px]">DUMMIO</span>
+            <span className="font-bold text-black text-[11px]">PIÑATA</span>
             <span>— Open-source virtual IoT simulator</span>
           </div>
           
@@ -987,8 +987,8 @@ ${currentBlade}
             © {new Date().getFullYear()} MIT License
           </div>
 
-          <a href="https://github.com/SeanNachapat/Dummio" target="_blank" rel="noreferrer" className="text-black font-bold hover:underline">
-            github.com/SeanNachapat/Dummio
+          <a href="https://github.com/SeanNachapat/Pinata" target="_blank" rel="noreferrer" className="text-black font-bold hover:underline">
+            github.com/SeanNachapat/Pinata
           </a>
         </footer>
 

@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
-from dummio.devices import IndustrialMotor
-from dummio.server import Server
+from pinata.devices import IndustrialMotor
+from pinata.server import Server
 
 @pytest.fixture
 def test_client():

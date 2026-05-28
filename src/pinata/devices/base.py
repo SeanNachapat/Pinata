@@ -3,7 +3,7 @@ import uuid
 import datetime
 from typing import Callable, List, Optional, Dict, Awaitable
 
-from dummio.models import SensorReading, AnomalyInjectionRequest
+from pinata.models import SensorReading, AnomalyInjectionRequest
 
 class VirtualDevice:
     """
