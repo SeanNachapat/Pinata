@@ -1,6 +1,6 @@
 # Dummio
 
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/your-org/dummio/graphs/commit-activity) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/SeanNachapat/Dummio/graphs/commit-activity) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 We are an open-source virtual IoT device service and Python package designed for evaluating anomaly detection cores and building IoT pipelines. Dummio allows working with fake sensor devices that behave exactly like real hardware, providing realistic data streams and an **event injection API** to trigger failures on demand.
 
@@ -34,7 +34,7 @@ Dummio comes with real-world device presets. The first available preset is the *
    ```
 3. Clone the repository and install Dummio dependencies:
    ```bash
-   git clone https://github.com/your-org/dummio.git
+   git clone https://github.com/SeanNachapat/Dummio.git
    cd dummio
    poetry install
    ```
@@ -70,7 +70,7 @@ Once running, you can inject an anomaly via REST:
 ```bash
 curl -X POST http://localhost:8000/api/inject \
     -H "Content-Type: application/json" \
-    -d '{"anomaly_type": "bearing_wear", "duration": 60}'
+    -d '{"anomaly_type": "bearing_wear", "duration_seconds": 60}'
 ```
 
 ## Web Landing Page & Interactive Playground
@@ -110,6 +110,6 @@ If you use Dummio in your research, please consider citing our project.
   title = {Dummio: Virtual IoT Device Service},
   year = {2026},
   publisher = {GitHub},
-  howpublished = {\url{https://github.com/your-org/dummio}}
+  howpublished = {\url{https://github.com/SeanNachapat/Dummio}}
 }
 ```

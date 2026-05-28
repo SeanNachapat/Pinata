@@ -20,11 +20,11 @@ const DEVICE_CONFIGS = {
     title: "Industrial Motor",
     type: "IndustrialMotor",
     description: "Simulates a manufacturing motor tracking rotational speed, housing temperature, electric draw, and physical vibrations.",
-    baseValues: { RPM: 1500, Temp: 45.0, Load: 10.0, Vib: 0.1 },
+    baseValues: { RPM: 1500, Temperature: 45.0, Current: 10.0 },
     metrics: [
       { key: "RPM", label: "Rotational Speed", unit: "RPM" },
-      { key: "Temp", label: "Casing Temperature", unit: "°C" },
-      { key: "Load", label: "Current Amperage", unit: "A" }
+      { key: "Temperature", label: "Casing Temperature", unit: "°C" },
+      { key: "Current", label: "Current Amperage", unit: "A" }
     ],
     anomalies: [
       { type: "bearing_wear", label: "🚨 Bearing Wear", desc: "Progressive bearing decay: increases vibration noise, raises power draw, spikes motor casing temp." },
@@ -35,11 +35,11 @@ const DEVICE_CONFIGS = {
     title: "Wind Turbine",
     type: "WindTurbine",
     description: "Simulates a utility-scale wind power turbine generating electricity, showing wind dynamics and mechanical gear ratios.",
-    baseValues: { Wind: 12.0, RPM: 18.0, Load: 1500.0, Vib: 0.15 },
+    baseValues: { WindSpeed: 12.0, RotorRPM: 18.0, PowerOutput: 1500.0 },
     metrics: [
-      { key: "Wind", label: "Wind Speed", unit: "m/s" },
-      { key: "RPM", label: "Rotor Speed", unit: "RPM" },
-      { key: "Load", label: "Power Output", unit: "kW" }
+      { key: "WindSpeed", label: "Wind Speed", unit: "m/s" },
+      { key: "RotorRPM", label: "Rotor Speed", unit: "RPM" },
+      { key: "PowerOutput", label: "Power Output", unit: "kW" }
     ],
     anomalies: [
       { type: "blade_imbalance", label: "❄️ Blade Imbalance", desc: "Ice/crack dynamic load: introduces high cyclic vibration, drops overall power output, slows rotation." },
@@ -50,11 +50,11 @@ const DEVICE_CONFIGS = {
     title: "Commercial HVAC",
     type: "SmartHVAC",
     description: "Simulates building climate loops managing thermal exchanges, compressor pressures, and electricity loads.",
-    baseValues: { Temp: 24.5, Pressure: 120.0, Load: 3.5, Vib: 0.02 },
+    baseValues: { RoomTemp: 24.5, CompressorPressure: 120.0, PowerLoad: 3.5 },
     metrics: [
-      { key: "Temp", label: "Room Temperature", unit: "°C" },
-      { key: "Pressure", label: "Compressor Pressure", unit: "PSI" },
-      { key: "Load", label: "Electricity Load", unit: "kW" }
+      { key: "RoomTemp", label: "Room Temperature", unit: "°C" },
+      { key: "CompressorPressure", label: "Compressor Pressure", unit: "PSI" },
+      { key: "PowerLoad", label: "Electricity Load", unit: "kW" }
     ],
     anomalies: [
       { type: "refrigerant_leak", label: "💧 Refrigerant Leak", desc: "Coolant system rupture: pressure collapses, room cooling breaks down, room temp climbs steadily." },
@@ -119,13 +119,34 @@ export default function LandingPage() {
   
   const config = DEVICE_CONFIGS[deviceKey];
 
+  // Calculate dynamic animation speed based on telemetry
+  const getAnimDelay = () => {
+    if (deviceKey === "IndustrialMotor") {
+      if (activeAnomaly === "mechanical_jam") return null;
+      const rpm = metricsValues["RPM"] || 1500;
+      return rpm > 0 ? Math.max(40, Math.min(250, 120000 / rpm)) : null;
+    }
+    if (deviceKey === "WindTurbine") {
+      const rpm = metricsValues["RotorRPM"] || 18.0;
+      return rpm > 0 ? Math.max(40, Math.min(300, 1800 / rpm)) : null;
+    }
+    if (deviceKey === "SmartHVAC") {
+      if (activeAnomaly === "fan_failure") return null;
+      return 80; // Fast and smooth constant speed
+    }
+    return 100;
+  };
+
+  const animDelay = getAnimDelay();
+
   // ----------------- ANIMATION FRAME TIMERS -----------------
   useEffect(() => {
+    if (animDelay === null) return;
     const animInterval = setInterval(() => {
-      setAnimFrame(prev => (prev + 1) % 4);
-    }, 150);
+      setAnimFrame(prev => (prev + 1) % 8);
+    }, animDelay);
     return () => clearInterval(animInterval);
-  }, []);
+  }, [animDelay]);
 
   // ----------------- SIMULATION ENGINE (REACT CLIENT-SIDE) -----------------
   
@@ -134,12 +155,15 @@ export default function LandingPage() {
     const base = config.baseValues as any;
     const initialValues: Record<string, number> = {};
     Object.keys(base).forEach((key) => {
-      if (key !== "Vib") {
-        initialValues[key] = base[key];
-      }
+      initialValues[key] = base[key];
     });
     setMetricsValues(initialValues);
-    setVibrationVal(base.Vib);
+    
+    let defaultVib = 0.1;
+    if (deviceKey === "WindTurbine") defaultVib = 0.15;
+    if (deviceKey === "SmartHVAC") defaultVib = 0.02;
+    setVibrationVal(defaultVib);
+    
     setChartData(Array(60).fill(50));
     setLogPackets([]);
     setActiveAnomaly(null);
@@ -165,60 +189,64 @@ export default function LandingPage() {
       const noise = () => (Math.random() - 0.5);
       
       const wearCoeff = ambientWear / 100.0;
-      let calculatedVib = base.Vib + wearCoeff * 0.15 + Math.random() * 0.02;
+      let baseVib = 0.1;
+      if (deviceKey === "WindTurbine") baseVib = 0.15;
+      if (deviceKey === "SmartHVAC") baseVib = 0.02;
+
+      let calculatedVib = baseVib + wearCoeff * 0.15 + Math.random() * 0.02;
 
       if (deviceKey === "IndustrialMotor") {
         // Motor model
         let rpm = base.RPM + noise() * 10 - wearCoeff * 15;
-        let temp = base.Temp + noise() * 0.5 + wearCoeff * 5.0;
-        let load = base.Load + noise() * 0.3 + wearCoeff * 1.5;
+        let temp = base.Temperature + noise() * 0.5 + wearCoeff * 5.0;
+        let current = base.Current + noise() * 0.3 + wearCoeff * 1.5;
 
         // Apply anomalies
         if (activeAnomaly === "bearing_wear") {
           calculatedVib += 0.8 * anomalySeverity + Math.random() * 0.2;
           temp += 12 * anomalySeverity;
-          load += 4 * anomalySeverity;
+          current += 4 * anomalySeverity;
           rpm -= 80 * anomalySeverity;
         } else if (activeAnomaly === "mechanical_jam") {
           rpm = 0.0;
           calculatedVib = Math.random() * 0.01;
-          load = 48.0 + noise() * 0.8;
+          current = 48.0 + noise() * 0.8;
           temp += 22 * anomalySeverity;
         }
 
         nextValues["RPM"] = Math.round(rpm * 100) / 100;
-        nextValues["Temp"] = Math.round(temp * 100) / 100;
-        nextValues["Load"] = Math.round(load * 100) / 100;
+        nextValues["Temperature"] = Math.round(temp * 100) / 100;
+        nextValues["Current"] = Math.round(current * 100) / 100;
 
       } else if (deviceKey === "WindTurbine") {
         // Turbine model
-        let wind = base.Wind + noise() * 0.8;
+        let wind = base.WindSpeed + noise() * 0.8;
         let powerRatio = Math.pow(wind / 12.0, 3);
         let rpm = wind * 1.5 + noise() * 0.15;
-        let load = Math.max(0.0, powerRatio * base.Load + noise() * 15);
-        let temp = base.Temp + (load / 1000.0) * 8.0 + noise() * 0.2;
+        let power = Math.max(0.0, powerRatio * base.PowerOutput + noise() * 15);
+        let temp = base.GeneratorTemp + (power / 1000.0) * 8.0 + noise() * 0.2;
 
         if (activeAnomaly === "blade_imbalance") {
           calculatedVib += 1.2 * anomalySeverity + Math.random() * 0.1;
-          load *= 0.82;
+          power *= 0.82;
           rpm *= 0.88;
         } else if (activeAnomaly === "gearbox_slippage") {
           rpm = Math.max(rpm + 12 * anomalySeverity, 35);
-          load *= 0.3;
+          power *= 0.3;
           temp += 32 * anomalySeverity;
           calculatedVib += 0.5 * anomalySeverity;
         }
 
-        nextValues["Wind"] = Math.round(wind * 100) / 100;
-        nextValues["RPM"] = Math.round(rpm * 100) / 100;
-        nextValues["Load"] = Math.round(load * 100) / 100;
-        nextValues["Temp"] = temp;
+        nextValues["WindSpeed"] = Math.round(wind * 100) / 100;
+        nextValues["RotorRPM"] = Math.round(rpm * 100) / 100;
+        nextValues["PowerOutput"] = Math.round(power * 100) / 100;
+        nextValues["GeneratorTemp"] = Math.round(temp * 100) / 100;
 
       } else if (deviceKey === "SmartHVAC") {
         // HVAC model
-        let roomTemp = base.Temp + noise() * 0.1 + wearCoeff * 1.2;
-        let pressure = base.Pressure + noise() * 1.5;
-        let load = base.Load + noise() * 0.05 + wearCoeff * 0.4;
+        let roomTemp = base.RoomTemp + noise() * 0.1 + wearCoeff * 1.2;
+        let pressure = base.CompressorPressure + noise() * 1.5;
+        let load = base.PowerLoad + noise() * 0.05 + wearCoeff * 0.4;
 
         if (activeAnomaly === "refrigerant_leak") {
           pressure = Math.max(12.0, pressure - 78 * anomalySeverity);
@@ -226,14 +254,14 @@ export default function LandingPage() {
           load = 1.1 + noise() * 0.05;
         } else if (activeAnomaly === "fan_failure") {
           pressure += 92 * anomalySeverity;
-          load = base.Load * (1.15 + 0.3 * anomalySeverity);
+          load = base.PowerLoad * (1.15 + 0.3 * anomalySeverity);
           roomTemp += 1.8 * anomalySeverity;
           calculatedVib += 0.45 * anomalySeverity;
         }
 
-        nextValues["Temp"] = Math.round(roomTemp * 100) / 100;
-        nextValues["Pressure"] = Math.round(pressure * 100) / 100;
-        nextValues["Load"] = Math.round(load * 100) / 100;
+        nextValues["RoomTemp"] = Math.round(roomTemp * 100) / 100;
+        nextValues["CompressorPressure"] = Math.round(pressure * 100) / 100;
+        nextValues["PowerLoad"] = Math.round(load * 100) / 100;
       }
 
       setVibrationVal(Math.round(calculatedVib * 10000) / 10000);
@@ -254,9 +282,9 @@ export default function LandingPage() {
       if (deviceKey === "IndustrialMotor") {
         primaryPercent = ((nextValues["RPM"] || 1500) / 3000) * 100;
       } else if (deviceKey === "WindTurbine") {
-        primaryPercent = ((nextValues["Load"] || 1500) / 2800) * 100;
+        primaryPercent = ((nextValues["PowerOutput"] || 1500) / 2800) * 100;
       } else if (deviceKey === "SmartHVAC") {
-        primaryPercent = ((nextValues["Pressure"] || 120) / 250) * 100;
+        primaryPercent = ((nextValues["CompressorPressure"] || 120) / 250) * 100;
       }
       primaryPercent = Math.min(100, Math.max(0, primaryPercent));
 
@@ -274,7 +302,9 @@ export default function LandingPage() {
         anomaly_type: activeAnomaly || null,
         sensors: {
           ...nextValues,
-          VibrationOverall: Math.round(calculatedVib * 10000) / 10000
+          VibrationX: Math.round((calculatedVib + (Math.random() - 0.5) * 0.02) * 10000) / 10000,
+          VibrationY: Math.round((calculatedVib + (Math.random() - 0.5) * 0.02) * 10000) / 10000,
+          VibrationZ: Math.round((calculatedVib + (Math.random() - 0.5) * 0.02) * 10000) / 10000
         }
       };
 
@@ -320,8 +350,10 @@ export default function LandingPage() {
     };
 
     if (deviceKey === "IndustrialMotor") {
-      const shaftChars = ["/", "—", "\\", "|"];
-      const shaft = isJam ? "X" : shaftChars[animFrame % 4];
+      const fanChars = ["|", "/", "-", "\\", "|", "/", "-", "\\"];
+      const shaftChars = ["|", "/", "-", "\\", "|", "/", "-", "\\"];
+      const fan = isJam ? "X" : fanChars[animFrame % 8];
+      const shaft = isJam ? "X" : shaftChars[animFrame % 8];
       const statusText = isJam 
         ? "⚠️ ERROR: ROTOR JAMMED // THERMAL LOCK DETECTED" 
         : activeAnomaly === "bearing_wear"
@@ -329,22 +361,21 @@ export default function LandingPage() {
         : `⚙️ ACTIVE CORE [RPM: ${metricsValues["RPM"] || 1500}]`;
 
       return cleanASCII(`
-       ___________________________________________
-      /                                           \\
-     |   [|||||||||||||||||||||||||||||||||||]     |====.        .-.
-     |   [         INDUSTRIAL MOTOR          ]     |    |=======( ${shaft} )=======> SHAFT OUT
-     |   [ ${statusText.padEnd(39)} ]     |===='        '-'
-      \\___________________________________________/
-             ||                           ||
-     =================================================== [MOUNT PLATE]
+         ______       ___________________________________________
+       //      \\\\    /                                           \\
+      ||   ${fan}    ||  |   [|||||||||||||||||||||||||||||||||||]     |====.        .-.
+      ||  |  |   ||  |   [         INDUSTRIAL MOTOR          ]     |    |=======( ${shaft} )=======> SHAFT OUT
+       \\\\______//   |   [ ${statusText.padEnd(39)} ]     |===='        '-'
+                     \\___________________________________________/
+                            ||                           ||
+                    =================================================== [MOUNT PLATE]
       `);
     }
 
     if (deviceKey === "WindTurbine") {
       const blades = [
-        // Frame 0: Vertical blade pointing UP, other two pointing DOWN-LEFT and DOWN-RIGHT
-        `
-                     |
+        // Frame 0: 0, 120, 240 deg (vertical UP, down-right, down-left)
+        `                     |
                      |
                      |
                  .===O===.
@@ -352,69 +383,97 @@ export default function LandingPage() {
                |           |
               /             \\\\
              /               \\\\
-            /                 \\\\
-                 ||     ||
-        `,
-        // Frame 1: Blades pointing UP-LEFT, UP-RIGHT, and DOWN-LEFT
-        `
-             \\\\               /
-              \\\\             /
-               \\\\           /
-                 .===O===.
+            /                 \\\\`,
+        // Frame 1: 15, 135, 255 deg
+        `                      \\\\
+                       \\\\
+                        \\\\
+             ____.===O===.
                 / [ GEN ] \\\\
-               |           |
-              /             
-             /               
-            /                 
-                 ||     ||
-        `,
-        // Frame 2: Blade pointing DOWN, other two pointing UP-LEFT and RIGHT
-        `
-             \\\\
-              \\\\
+               |     |     |
+                     |      
+                     |       
+                     |        `,
+        // Frame 2: 30, 150, 270 deg (top-right, bottom-right, horizontal left)
+        `                        \\\\\\\\
+                         \\\\\\\\
+                          \\\\\\\\
+          _______.===O===.
+                / [ GEN ] \\\\
+               |     \\\\     |
+                      \\\\     
+                       \\\\     
+                              `,
+        // Frame 3: 45, 165, 285 deg (diagonal top-right, bottom-right-steep, up-left)
+        `                            \\\\
+                             \\\\
+          \\\\                  \\\\
+           \\\\    .===O===.
+                / [ GEN ] \\\\
+               |     \\\\     |
+                      \\\\     
+                      |      
+                      |       `,
+        // Frame 4: 60, 180, 300 deg (flatter top-right, vertical down, up-left-steep)
+        `              \\\\
                \\\\
-                 .===O===.=======
+                \\\\  .===O===. ______
                 / [ GEN ] \\\\
                |     |     |
                      |
                      |
                      |
-                 ||  |  ||
-        `,
-        // Frame 3: Blade pointing LEFT, other two pointing UP-RIGHT and DOWN-RIGHT
-        `
-                             /
-                            /
-                           /
-         ========.===O===.
+                              `,
+        // Frame 5: 75, 195, 315 deg (almost horizontal right, down-left, diagonal up-left)
+        `         \\\\
+          \\\\
+           \\\\    .===O===. ________
                 / [ GEN ] \\\\
                |           |
-                            \\\\
-                             \\\\
-                              \\\\
-                 ||     ||
-        `
+              /
+             /
+            /
+                              `,
+        // Frame 6: 90, 210, 330 deg (horizontal right, down-left-flatter, up-left-flatter)
+        `          \\\\
+           \\\\
+            \\\\    .===O===. _________
+                / [ GEN ] \\\\
+               |           |
+              /             \\\\
+             /
+            /
+                              `,
+        // Frame 7: 105, 225, 345 deg (bottom-right, down-left-steep, almost vertical UP)
+        `                     |
+                     |
+                     |
+                 .===O===.
+                / [ GEN ] \\\\
+               |           \\\\
+              /             \\\\
+             /
+            /`
       ];
-      
-      const currentBlade = cleanASCII(blades[animFrame % 4]);
-      const statusText = isImbalance
+
+      const currentBlade = cleanASCII(blades[animFrame % 8]);
+      const statusText = isImbalance 
         ? "⚠️ STATE: HEAVY ROTOR ASYMMETRY LOAD"
         : isSlippage
         ? "⚠️ STATE: GEAR FRICTION OVERHEAT BREAKDOWN"
-        : `⚡ STATE: GENERATING DYNAMIC POWER [${metricsValues["Load"] || 1200} kW]`;
+        : `⚡ STATE: GENERATING DYNAMIC POWER [${metricsValues["PowerOutput"] || 1200} kW]`;
 
       return cleanASCII(`
 ${currentBlade}
                  ||     ||   ${statusText}
-                /         \\\\
-               /           \\\\
+                 ||     ||
              ==========================================
       `);
     }
 
     if (deviceKey === "SmartHVAC") {
-      const fanChars = ["*", "x", "+", "#"];
-      const fan = isFanFail ? "!" : fanChars[animFrame % 4];
+      const fanChars = ["(|)", "(/)", "(-)", "(\\)"];
+      const fan = isFanFail ? "(!)" : fanChars[animFrame % 4];
       const statusText = isFanFail
         ? "⚠️ STATE: FANS LOCKOUT // DANGEROUS CASING PSI"
         : isLeak
@@ -427,7 +486,7 @@ ${currentBlade}
      |   [ HVAC UNIT CORE ]                       |
      |   .------------------------------------.   |
      |   |   ( )            ( )          ( )  |   |====► EXHAUST AIR
-     |   |   [${fan}]            [${fan}]          [${fan}]  |   |
+     |   |  [${fan}]          [${fan}]          [${fan}]  |   |
      |   '------------------------------------'   |   ${statusText}
       \\___________________________________________/
       `);
